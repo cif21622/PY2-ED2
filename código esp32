@@ -16,7 +16,7 @@ void setup() {
   celda.begin(DT, SCK);
   Serial.println("Para obtener el factor de escala");
   //Función para obtener el valor de escala
-  celda.set_scale(2213.f);
+  celda.set_scale(103.f);
   //Tara de la balanza, toma el valor de escala y lo resta para poner en 0 la lectura 
   celda.tare();
 }
