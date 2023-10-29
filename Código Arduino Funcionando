@@ -1,0 +1,47 @@
+//Lectura de balanza 
+//César André CIfuentes Guzmán 
+//21622
+
+#include <Arduino.h>
+#include "HX711.h"
+float peso; 
+String pesost;
+#define DT 5
+#define SCK 18
+//Se define celda para funciones de biblioteca 
+HX711 celda; 
+
+void setup() {
+  Serial.begin(115200);
+  Serial2.begin(115200);
+  //Se inician los valores del módulo 
+  celda.begin(DT, SCK);
+  Serial.println("Para obtener el factor de escala");
+  //Función para obtener el valor de escala
+  celda.set_scale(103.f);
+  //Tara de la balanza, toma el valor de escala y lo resta para poner en 0 la lectura 
+  celda.tare();
+}
+
+void loop() {
+peso = celda.get_units(10);
+pesost = String(peso); 
+Serial.print("Valor (Gramos):");
+Serial.println(peso, 1);
+celda.power_down();
+delay(3000);
+celda.power_up();
+
+if(Serial2.available()>0){
+  char comando = Serial2.read();
+  if(comando == '+'){
+  Serial.println("El peso es de:");
+  Serial.print(peso);
+  Serial.println(" g");
+  //Se envia el valor medido del sensor
+  Serial2.print(pesost);
+
+}
+}
+
+}
