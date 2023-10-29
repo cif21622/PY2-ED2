@@ -3,14 +3,13 @@
 //Código de la Tiva C 
 #include <SD.h>
 #include <SPI.h>
-File archivodemediciones;
+File myFile;
 float ValorDeBalanza;
 
 //Variables Gblobales 
 //Se definen las variables de los bótones 
 #define BotonB1 PUSH1
 #define BotonB2 PUSH2
-#define CS_PIN 12
 
 
 
@@ -50,10 +49,10 @@ while(!Serial){
 }
 SPI.setModule(0);
 Serial.print("Initializing SD card...");
-pinMode(CS_PIN, OUTPUT);
-if (!SD.begin(CS_PIN)) {
+pinMode(12, OUTPUT);
+if (!SD.begin(12)) {
     Serial.println("Card initialization failed!");
-    while (true);
+    return;
   }
 Serial.println("initialization done.");
 }
@@ -62,6 +61,7 @@ Serial.println("initialization done.");
 
 //Loop principal 
 void loop() {
+ValorDeBalanza=3;
 
 //Código para traer la memoria del sensor 
 if (!medir) {
@@ -69,17 +69,19 @@ if (!medir) {
   }
 //Código para guardar en la memoria SD la toma del sensor 
 if (!guardar) {
-  archivodemediciones = SD.open("Mediciones de Balanza.csv", FILE_WRITE);
-      if (archivodemediciones) {
+      myFile = SD.open("test.txt", FILE_WRITE);
+      if (myFile) {
       Serial.print("Writing in text...");
-      archivodemediciones.println(ValorDeBalanza);
-      archivodemediciones.close();
+      myFile.println(ValorDeBalanza);
+      myFile.close();
       Serial.println("Done");
       }else {
-        Serial.println("error opening Mediciones de Balanza.csv!");
+        Serial.println("error opening Datosdepeso.txt!");
       }
+
+      guardar = true;     
+   }
 }
-  }
 
 //Vector de interrupción 
 //*****************************************************************************
