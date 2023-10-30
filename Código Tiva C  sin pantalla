@@ -1,0 +1,155 @@
+//Proyecto No.2 
+//César CIfuentes 21622
+//Código de la Tiva C 
+#include <SD.h>
+#include <SPI.h>
+#include <stdlib.h>
+File myFile;
+float ValorDeBalanza;
+String LecturaDato; 
+
+//Variables Gblobales 
+//Se definen las variables de los bótones 
+#define BotonB1 PUSH1
+#define BotonB2 PUSH2
+
+//Se define el pin del Buzzer 
+#define BUZZER_PIN 39
+
+
+
+
+//Se definen las variables para verificar el estado del bóton y verificar si se incrementa o decrementa el bóton 
+volatile bool medir = true; 
+volatile bool guardar = true;
+
+//Variable utilizada para recibir la comunicación desde el ESP32 
+char Receptor;
+
+
+//Variables para enviar y recibir el valor del Potenciometro 1 y 2 
+float unidad1, decimal1, centesima1;
+int unidad2, decimal2, centesima2;
+
+
+void setup() {
+
+//Configuración de la velocidad de la comunicación 
+Serial.begin(115200);
+Serial2.begin(115200); 
+//Configuración del Pin de salida 
+pinMode(BUZZER_PIN, OUTPUT);
+
+//Mensaje de confirmación de conexión realizada
+Serial.println("Conexión con Computadora  Completa");
+Serial.println("Conexión con ESP332 Completa ");
+
+//Configuración de los Bótones como interrupciones 
+pinMode(BotonB1, INPUT_PULLUP);
+attachInterrupt(BotonB1, ISR_1, FALLING);
+pinMode(BotonB2, INPUT_PULLUP);
+attachInterrupt(BotonB2, ISR_2, FALLING);
+
+
+//Configuración de los parametros de la SD
+while(!Serial){
+  ;
+}
+SPI.setModule(0);
+Serial.print("Initializing SD card...");
+pinMode(12, OUTPUT);
+if (!SD.begin(12)) {
+    Serial.println("Card initialization failed!");
+    return;
+  }
+Serial.println("initialization done.");
+}
+
+
+
+//Loop principal 
+void loop() {
+
+//Código para traer la memoria del sensor 
+if (!medir) {
+   Serial2.write('+');
+   medir = true; 
+   Serial.print("Se envia el mensaje ");
+  }
+//Código para guardar en la memoria SD la toma del sensor 
+if (!guardar) {
+      myFile = SD.open("test.txt", FILE_WRITE);
+      if (myFile) {
+      Serial.print("Writing in text...");
+      myFile.println("La masa medida es de: ");
+      myFile.print(ValorDeBalanza);
+      myFile.print(" g");   
+      myFile.close();
+      Serial.println("Done");
+      playSavedSound();
+      }else {
+        Serial.println("error opening Datosdepeso.txt!");
+      }
+
+      guardar = true;     
+   }
+
+
+//Recepción del Valor del Sensor
+
+if(Serial2.available()>0){
+  LecturaDato = Serial2.readString();
+  delay(200); 
+  ValorDeBalanza = LecturaDato.toFloat();
+  limpiarBuffer();
+  Serial.println("El valor medido se configuró");
+  Serial.println(ValorDeBalanza);
+  sendToneOnDataSend();
+}
+
+
+}
+
+//Vector de interrupción 
+//*****************************************************************************
+
+//Estas interrupciones sirven para generar el aumento o decremento de los ciclos de trabajo al presionar los bótones B1, B2, B4
+void ISR_1() {
+  medir = false;
+}
+
+void ISR_2() {
+  guardar = false;
+}
+
+
+void limpiarBuffer() {
+  while (Serial2.available() > 0) {
+    char c = Serial2.read(); // Lee y descarta los bytes restantes en el búfer
+  }
+}
+
+
+void playSavedSound() {
+  int savedSound[] = {523, 587, 659, 698, 784, 880, 988, 1047};
+  int duration = 100;
+  
+  for (int i = 0; i < 8; i++) {
+    tone(BUZZER_PIN, savedSound[i], duration);
+    delay(duration);
+  }
+  noTone(BUZZER_PIN);
+}
+
+
+
+void sendToneOnDataSend() {
+  int sendSound[] = {800, 1000, 1200, 1400, 1600, 1800, 2000, 1800};
+  int duration[] = {200, 200, 200, 200, 200, 200, 200, 200};
+  
+  for (int i = 0; i < 8; i++) {
+    tone(BUZZER_PIN, sendSound[i], duration[i]);
+    delay(duration[i]);
+  }
+  noTone(BUZZER_PIN);
+}
