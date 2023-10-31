@@ -2,47 +2,64 @@
 //César André CIfuentes Guzmán 
 //21622
 
+//Se incluyen las librerías para realizar la medición con el sensor 
 #include <Arduino.h>
 #include "HX711.h"
+//Declaración de variables
+
+// Variable para almacenar el peso medido
 float peso; 
+// Cadena de caracteres para almacenar el peso como texto
 String pesost;
+// Definición del pin DT conectado al HX711
 #define DT 5
+// Definición del pin SCK conectado al HX711
 #define SCK 18
 //Se define celda para funciones de biblioteca 
 HX711 celda; 
 
 void setup() {
+  //Inicialización de la comunicación serial
   Serial.begin(115200);
   Serial2.begin(115200);
   //Se inician los valores del módulo 
+  //Configuración inicial del sensor de carga
   celda.begin(DT, SCK);
   Serial.println("Para obtener el factor de escala");
   //Función para obtener el valor de escala
+  //Establecimiento del factor de escala para el sensor
+  
   celda.set_scale(103.f);
   //Tara de la balanza, toma el valor de escala y lo resta para poner en 0 la lectura 
+  //Tara de la balanza para ponerla en cero
   celda.tare();
 }
 
 void loop() {
-//peso = 2.14;
+//Medición del peso actual
 peso = celda.get_units(10);
 pesost = String(peso); 
+//Impresión del valor del peso en gramos a través del puerto serial
+  
 Serial.print("Valor (Gramos):");
 Serial.println(peso, 1);
+
+//Apagado y encendido del sensor para evitar posibles errores
 celda.power_down();
 delay(3000);
 celda.power_up();
 
 if(Serial2.available()>0){
+  //Lectura del comando recibido
   char comando = Serial2.read();
+  //Verificación de si el comando es para imprimir el peso
   if(comando == '+'){
   Serial.println("El peso es de:");
   Serial.print(peso);
   Serial.println(" g");
-  //Se envia el valor medido del sensor
+   //Envío del valor medido del sensor a través del puerto serial 2
   Serial2.print(pesost);
 
 }
 }
-
 }
