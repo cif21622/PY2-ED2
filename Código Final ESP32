@@ -24,6 +24,7 @@ void setup() {
 }
 
 void loop() {
+//peso = 2.14;
 peso = celda.get_units(10);
 pesost = String(peso); 
 Serial.print("Valor (Gramos):");
