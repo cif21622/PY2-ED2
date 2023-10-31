@@ -54,7 +54,7 @@ extern uint8_t fondo[];
 String text2 = "Guardando...";
 String text3 = " Guardado";
 String text4 = "Midiendo...";
-String text5;
+String text5 ;
 
 
 
@@ -169,7 +169,7 @@ if (!guardar) {
       Serial.print("Writing in text...");
       myFile.println("La masa medida es de: ");
       myFile.print(ValorDeBalanza);
-      myFile.print(" g");   
+      myFile.println(" g");   
       myFile.close();
       Serial.println("Done");
       playSavedSound();
@@ -178,8 +178,12 @@ if (!guardar) {
       }
       
       guardar = true;    
-      LCD_Guardando(); 
-      LecturaDato != LecturaDatoPrev;
+      LCD_Guardando();
+      delay(10);
+      
+      LCD_Presentarpeso();
+      String Texto10=  "Realice nueva medición ";
+      LCD_Print(Texto10, 0, 120, 2, 0x00, 0xFFFF);
       
    }
 
@@ -196,7 +200,7 @@ if(Serial2.available()>0){
   LCD_Midiendo();
 }
 
-
+delay(10);
 }
 //***************************************************************************************************************************************
 // Función para inicializar LCD
