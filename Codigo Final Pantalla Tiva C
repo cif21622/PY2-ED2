@@ -49,6 +49,8 @@ void LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int 
 
 extern uint8_t fondo[];
 
+extern uint8_t imgbalanza [];
+
 
 //Variables Globales 
 String text2 = "Guardando...";
@@ -79,7 +81,6 @@ String LecturaDatoPrev;
 
 //Se define el pin del Buzzer 
 #define BUZZER_PIN 39
-
 
 
 
@@ -150,8 +151,11 @@ void loop() {
 text5 = LecturaDato;
 if ( LecturaDato != LecturaDatoPrev) {
    LCD_Presentarpeso();
-   LCD_Print(text5, 120, 120, 2, 0x00, 0xFFFF);
+   String text20 = "La masa en gramos(g): ";
+    LCD_Print(text20, 0, 100, 2, 0x00, 0x055F);
+   LCD_Print(text5, 120, 116, 2, 0xFFFF, 0x055F);
    LecturaDato = LecturaDatoPrev;
+   LCD_Bitmap(140,180, 46,24, imgbalanza);
 
   } 
 
@@ -182,8 +186,11 @@ if (!guardar) {
       delay(10);
       
       LCD_Presentarpeso();
-      String Texto10=  "Realice nueva medición ";
-      LCD_Print(Texto10, 0, 120, 2, 0x00, 0xFFFF);
+      String Texto10=  "    Realice nueva     ";
+      LCD_Print(Texto10, 0, 100, 2, 0x00, 0x043F);
+      String Texto11=  "      Medicion       ";
+      LCD_Print(Texto11, 0, 116, 2, 0x00, 0x043F);
+      LCD_Bitmap(140,180, 46,24, imgbalanza);
       
    }
 
@@ -615,8 +622,9 @@ void LCD_Midiendo(){
 void LCD_Presentarpeso(){
  LCD_Clear(0x00);
  FillRect(0, 0, 320, 239,0xFFFF);
+ FillRect(0, 0, 160, 200,0xFAC0);
  String text1 = "      Balanza   ";
- LCD_Print(text1, 0, 20, 2, 0x00, 0xFFFF);
+ LCD_Print(text1, 0, 20, 2, 0x00,0xFFFF);
 //Definición del SUelo para la pantalla 
  for(int x = 0; x <319; x++){
     LCD_Bitmap(x, 207, 32,32, tile);
@@ -672,3 +680,4 @@ void sendToneOnDataSend() {
   }
   noTone(BUZZER_PIN);
 }
+
