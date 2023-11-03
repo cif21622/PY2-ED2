@@ -6,6 +6,12 @@
  * IE3027: Electrónica Digital 2 - 2019
  */
 //***************************************************************************************************************************************
+//Proyecto No.2 
+//César CIfuentes 
+//21622
+//Código de la Tiva C 
+//Código T
+//Se incluyen las librerías para el display en la pantalla LCD TFT
 #include <stdint.h>
 #include <stdbool.h>
 #include <TM4C123GH6PM.h>
@@ -19,10 +25,11 @@
 #include "driverlib/rom.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/timer.h"
+#include "bitmaps.h"  // Inclusión de archivos de mapa de bits
+#include "font.h" // Inclusión de archivos de fuentes
+#include "lcd_registers.h"  // Inclusión de registros de LCD
 
-#include "bitmaps.h"
-#include "font.h"
-#include "lcd_registers.h"
+// Definición de pines para el control de la pantalla
 
 #define LCD_RST PD_0
 #define LCD_CS PD_1
@@ -30,6 +37,8 @@
 #define LCD_WR PD_3
 #define LCD_RD PE_1
 int DPINS[] = {PB_0, PB_1, PB_2, PB_3, PB_4, PB_5, PB_6, PB_7};  
+
+
 //***************************************************************************************************************************************
 // Functions Prototypes
 //***************************************************************************************************************************************
@@ -43,15 +52,14 @@ void V_line(unsigned int x, unsigned int y, unsigned int l, unsigned int c);
 void Rect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int c);
 void FillRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int c);
 void LCD_Print(String text, int x, int y, int fontSize, int color, int background);
-
 void LCD_Bitmap(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned char bitmap[]);
 void LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int columns, int index, char flip, char offset);
-
+//Definición de imagenes almocenado en la memoria 
 extern uint8_t fondo[];
-
 extern uint8_t imgbalanza [];
 
 
+//Variables utilizadas para mostrar texto en la pantalla 
 //Variables Globales 
 String text2 = "Guardando...";
 String text3 = " Guardado";
@@ -62,29 +70,31 @@ String text5 ;
 
 
 //Union del Programa 2
-
-//Proyecto No.2 
-//César CIfuentes 21622
-//Código de la Tiva C 
+// LLaman a las librerías para el uso de SD y SPI 
 #include <SD.h>
 #include <SPI.h>
 #include <stdlib.h>
+
+//Se crea un archivo tipo File para abrir el archivo del SD
 File myFile;
+
+//Se definen los valores de las variables para almacenar los valores del sensor, el cual es el peso de la balanza. Se definen como String los valores que se obtiene del ESP32 por medio de la comunicación UART 
 float ValorDeBalanza;
 String LecturaDato; 
 String LecturaDatoPrev;
+
 
 //Variables Gblobales 
 //Se definen las variables de los bótones 
 #define BotonB1 PUSH1
 #define BotonB2 PUSH2
 
-//Se define el pin del Buzzer 
+//Se define el pin del Buzzer para emitir el sonido de la alarma 
 #define BUZZER_PIN 39
 
 
 
-//Se definen las variables para verificar el estado del bóton y verificar si se incrementa o decrementa el bóton 
+//Se definen las variables para verificar el estado del bóton y verificar si se incrementa o decrementa el bóton, esto para poder hacer uso de las interrupciones 
 volatile bool medir = true; 
 volatile bool guardar = true;
 
@@ -96,6 +106,7 @@ char Receptor;
 // Inicialización
 //***************************************************************************************************************************************
 void setup() {
+//
   SysCtlClockSet(SYSCTL_SYSDIV_2_5|SYSCTL_USE_PLL|SYSCTL_OSC_MAIN|SYSCTL_XTAL_16MHZ);
   Serial.begin(115200);
   Serial2.begin(115200); 
@@ -108,7 +119,7 @@ void setup() {
   LCD_Print(text1, 0, 20, 2, 0x00, 0xFFFF);
 //LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int columns, int index, char flip, char offset);
  
-//Definición del SUelo para la pantalla 
+//Definición del Suelo para la pantalla, se utiliza el bitmap que se encuentra en el archivo de BITMAPS 
  for(int x = 0; x <319; x++){
     LCD_Bitmap(x, 207, 32,32, tile);
     x += 31;
@@ -144,10 +155,15 @@ if (!SD.begin(12)) {
 Serial.println("initialization done.");
   
 }
+
+
+
+
 //***************************************************************************************************************************************
 // Loop Infinito
 //***************************************************************************************************************************************
 void loop() {
+//Se define una igualdad entre el text5 y el valor de lectura de 
 text5 = LecturaDato;
 if ( LecturaDato != LecturaDatoPrev) {
    LCD_Presentarpeso();
@@ -206,7 +222,7 @@ if(Serial2.available()>0){
   sendToneOnDataSend();
   LCD_Midiendo();
 }
-
+//Delay para que el código siga corriendo
 delay(10);
 }
 //***************************************************************************************************************************************
@@ -562,7 +578,10 @@ void LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int 
 
 
 
-
+//***************************************************************************************************************************************
+// Función personalizadas 
+//***************************************************************************************************************************************
+//Funcción para mostrar en Pantalla TFT LCD que se está guardando el peso en la SD y animación 
 void LCD_Guardando(){
 
  LCD_Clear(0x00);
@@ -596,7 +615,7 @@ void LCD_Guardando(){
   
 }
 
-
+//Funcción para mostrar en Pantalla TFT LCD que se está midiendo el peso y animación 
 void LCD_Midiendo(){
  LCD_Clear(0x00);
  FillRect(0, 0, 320, 239,0xFFFF);
@@ -618,7 +637,7 @@ void LCD_Midiendo(){
   
 }
 
-
+//Funcion para mostrar fondo al momento de mostrar el peso luego de hacer medición o guardar en la memoria 
 void LCD_Presentarpeso(){
  LCD_Clear(0x00);
  FillRect(0, 0, 320, 239,0xFFFF);
@@ -640,7 +659,7 @@ void LCD_Presentarpeso(){
 //Vector de interrupción 
 //*****************************************************************************
 
-//Estas interrupciones sirven para generar el aumento o decremento de los ciclos de trabajo al presionar los bótones B1, B2, B4
+//Estas interrupciones sirven para generar el cambio en los estados de medir peso y guardar valor en memoria SD B1 (Medir peso), B2 (Guardar Peso en memoria SD)
 void ISR_1() {
   medir = false;
 }
@@ -649,14 +668,14 @@ void ISR_2() {
   guardar = false;
 }
 
-
+//Función para limpiar el Buffer en la comunicación Serial con el ESP32 y evitar errores en la comunicación o la recepción de un valor duplicado
 void limpiarBuffer() {
   while (Serial2.available() > 0) {
     char c = Serial2.read(); // Lee y descarta los bytes restantes en el búfer
   }
 }
 
-
+//Función para mnostrar sonido en el Buzzer cuando se almacena un valor de peso en la SD
 void playSavedSound() {
   int savedSound[] = {523, 587, 659, 698, 784, 880, 988, 1047};
   int duration = 100;
@@ -669,7 +688,7 @@ void playSavedSound() {
 }
 
 
-
+//Función para mnostrar sonido en el Buzzer cuando se realiza una medición 
 void sendToneOnDataSend() {
   int sendSound[] = {800, 1000, 1200, 1400, 1600, 1800, 2000, 1800};
   int duration[] = {200, 200, 200, 200, 200, 200, 200, 200};
