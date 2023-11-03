@@ -11,6 +11,7 @@
 //21622
 //Código de la Tiva C 
 //Código T
+//***************************************************************************************************************************************
 //Se incluyen las librerías para el display en la pantalla LCD TFT
 #include <stdint.h>
 #include <stdbool.h>
