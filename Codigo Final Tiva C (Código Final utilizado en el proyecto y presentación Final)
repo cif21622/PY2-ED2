@@ -107,55 +107,59 @@ char Receptor;
 // Inicialización
 //***************************************************************************************************************************************
 void setup() {
-//
+  // Configuración del reloj a 40MHz
   SysCtlClockSet(SYSCTL_SYSDIV_2_5|SYSCTL_USE_PLL|SYSCTL_OSC_MAIN|SYSCTL_XTAL_16MHZ);
+  
+  // Inicialización de la comunicación serial a 115200 baudios
   Serial.begin(115200);
   Serial2.begin(115200); 
+  
+  // Configuración de los pines del puerto B como entradas con resistencias pull-up
   GPIOPadConfigSet(GPIO_PORTB_BASE, 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7, GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD_WPU);
+  
+  // Mensaje de inicio
   Serial.println("Inicio");
+  
+  // Inicialización y limpieza de la pantalla LCD
   LCD_Init();
   LCD_Clear(0x00);
-  FillRect(0, 0, 320, 239,0xFFFF);
+  FillRect(0, 0, 320, 239, 0xFFFF);
+  
+  // Impresión del texto en la pantalla LCD
   String text1 = "      Balanza   ";
   LCD_Print(text1, 0, 20, 2, 0x00, 0xFFFF);
-//LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int columns, int index, char flip, char offset);
- 
-//Definición del Suelo para la pantalla, se utiliza el bitmap que se encuentra en el archivo de BITMAPS 
- for(int x = 0; x <319; x++){
-    LCD_Bitmap(x, 207, 32,32, tile);
+
+  // Definición del suelo para la pantalla utilizando un bitmap predefinido
+  for(int x = 0; x < 319; x++){
+    LCD_Bitmap(x, 207, 32, 32, tile);
     x += 31;
- }
-
-
-//Setup programa 2 
-//Configuración del Pin de salida 
-pinMode(BUZZER_PIN, OUTPUT);
-
-//Mensaje de confirmación de conexión realizada
-Serial.println("Conexión con Computadora  Completa");
-Serial.println("Conexión con ESP332 Completa ");
-
-//Configuración de los Bótones como interrupciones 
-pinMode(BotonB1, INPUT_PULLUP);
-attachInterrupt(BotonB1, ISR_1, FALLING);
-pinMode(BotonB2, INPUT_PULLUP);
-attachInterrupt(BotonB2, ISR_2, FALLING);
-
-
-//Configuración de los parametros de la SD
-while(!Serial){
-  ;
-}
-SPI.setModule(0);
-Serial.print("Initializing SD card...");
-pinMode(12, OUTPUT);
-if (!SD.begin(12)) {
-    Serial.println("Card initialization failed!");
-    return;
   }
-Serial.println("initialization done.");
-  
+
+  // Configuración del Pin de salida y mensajes de confirmación de conexión
+  pinMode(BUZZER_PIN, OUTPUT);
+  Serial.println("Conexión con Computadora  Completa");
+  Serial.println("Conexión con ESP32 Completa ");
+
+  // Configuración de los botones como interrupciones y configuración de los parámetros de la SD
+  pinMode(BotonB1, INPUT_PULLUP);
+  attachInterrupt(BotonB1, ISR_1, FALLING);
+  pinMode(BotonB2, INPUT_PULLUP);
+  attachInterrupt(BotonB2, ISR_2, FALLING);
+
+  // Inicialización de la SD Card y mensaje de confirmación
+  while(!Serial){
+    ;
+  }
+  SPI.setModule(0);
+  Serial.print("Initializing SD card...");
+  pinMode(12, OUTPUT);
+  if (!SD.begin(12)) {
+      Serial.println("Card initialization failed!");
+      return;
+  }
+  Serial.println("initialization done.");
 }
+
 
 
 
@@ -166,8 +170,11 @@ Serial.println("initialization done.");
 void loop() {
 //Se define una igualdad entre el text5 y el valor de lectura de 
 text5 = LecturaDato;
+// Si hay una diferencia entre la LecturaDato actual y la anterior, se muestra el valor en la pantalla LCD
+
+
 if ( LecturaDato != LecturaDatoPrev) {
-   LCD_Presentarpeso();
+   LCD_Presentarpeso();// Muestra el peso en la pantalla 
    String text20 = "La masa en gramos(g): ";
     LCD_Print(text20, 0, 100, 2, 0x00, 0x055F);
    LCD_Print(text5, 120, 116, 2, 0xFFFF, 0x055F);
@@ -183,7 +190,7 @@ if (!medir) {
    medir = true; 
    Serial.print("Se envia el mensaje ");
   }
-//Código para guardar en la memoria SD la toma del sensor 
+//Código para guardar en la memoria SD la toma del sensor y mensaje de confirmación 
 if (!guardar) {
       myFile = SD.open("test.txt", FILE_WRITE);
       if (myFile) {
@@ -210,8 +217,7 @@ if (!guardar) {
       LCD_Bitmap(140,180, 46,24, imgbalanza);
       
    }
-
-//Recepción del Valor del Sensor
+ // Recepción del valor del sensor
 
 if(Serial2.available()>0){
   LecturaDato = Serial2.readString();
