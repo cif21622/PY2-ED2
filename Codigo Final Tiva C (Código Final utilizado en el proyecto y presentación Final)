@@ -172,7 +172,7 @@ void loop() {
 text5 = LecturaDato;
 // Si hay una diferencia entre la LecturaDato actual y la anterior, se muestra el valor en la pantalla LCD
 
-
+//Se muestra en la pantalla el nuevo valor en gramos actualizado, se llama a la función para que presente el valor
 if ( LecturaDato != LecturaDatoPrev) {
    LCD_Presentarpeso();// Muestra el peso en la pantalla 
    String text20 = "La masa en gramos(g): ";
@@ -208,7 +208,7 @@ if (!guardar) {
       guardar = true;    
       LCD_Guardando();
       delay(10);
-      
+      //Se muestra mensaje para que el usuario realice nueva medición 
       LCD_Presentarpeso();
       String Texto10=  "    Realice nueva     ";
       LCD_Print(Texto10, 0, 100, 2, 0x00, 0x043F);
@@ -223,6 +223,7 @@ if(Serial2.available()>0){
   LecturaDato = Serial2.readString();
   delay(200); 
   ValorDeBalanza = LecturaDato.toFloat();
+//Función para limpiar el buffer y evitar toma de doble datos 
   limpiarBuffer();
   Serial.println("El valor medido se configuró");
   Serial.println(ValorDeBalanza);
