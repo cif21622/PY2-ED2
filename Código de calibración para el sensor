@@ -1,6 +1,6 @@
 //Método de calibración de balanza 
 //César André CIfuentes Guzmán 
-//21622
+//21622 
 
 #include <Arduino.h>
 #include "HX711.h"
